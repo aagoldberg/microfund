@@ -8,22 +8,24 @@ const IPFS_GATEWAY = process.env.NEXT_PUBLIC_IPFS_GATEWAY || 'https://gateway.pi
 
 const GET_ALL_CAMPAIGNS = gql`
   query GetAllCampaigns {
-    campaigns(orderBy: createdAt, orderDirection: desc) {
+    loans(orderBy: createdAt, orderDirection: desc) {
       id
-      campaignId
-      owner
-      metadataURI
-      fundingGoal
+      address
+      loanAmount
       totalFunded
-      deadline
-      revenueSharePercent
-      repaymentCap
+      fundingDeadline
       fundingActive
-      repaymentActive
+      loanDisbursed
+      loanFullyRepaid
       totalRepaid
-      contributionCount
-      investorCount
+      metadataURI
       createdAt
+      borrower {
+        id
+        name
+        address
+        verified
+      }
     }
   }
 `;
@@ -42,17 +44,22 @@ interface CampaignMetadata {
 
 interface Campaign {
   address: `0x${string}`;
-  campaignId?: string;
-  owner: string;
-  fundingGoal: string;
+  id?: string;
+  loanAmount: string;
   totalFunded: string;
-  deadline: string;
-  revenueSharePercent: number;
-  repaymentCap: number;
+  fundingDeadline: string;
   fundingActive: boolean;
-  repaymentActive: boolean;
+  loanDisbursed: boolean;
+  loanFullyRepaid: boolean;
+  totalRepaid: string;
   backerCount?: number;
   createdAt?: string;
+  borrower?: {
+    id: string;
+    name?: string;
+    address: string;
+    verified: boolean;
+  };
   metadata: CampaignMetadata | null;
 }
 
@@ -125,50 +132,46 @@ export function useCampaigns() {
   });
 
   useEffect(() => {
-    if (data?.campaigns) {
+    if (data?.loans) {
       processCampaigns();
-    } else if (error) {
-      // Fallback to mock data if GraphQL fails
-      console.warn('GraphQL query failed, using mock data:', error.message);
-      setMockCampaigns();
     }
   }, [data, error]);
 
   const processCampaigns = async () => {
-    if (!data?.campaigns) return;
+    if (!data?.loans) return;
 
     try {
-      const campaignPromises = data.campaigns.map(async (campaign: any) => {
+      const campaignPromises = data.loans.map(async (loan: any) => {
         let metadata: CampaignMetadata | null = null;
-        
+
         // Always provide fallback metadata
-        if (campaign.metadataURI) {
-          metadata = await getIPFSMetadata(campaign.metadataURI);
+        if (loan.metadataURI) {
+          metadata = await getIPFSMetadata(loan.metadataURI);
         }
-        
+
         // If no metadata, create a basic one
         if (!metadata) {
           metadata = {
-            title: `Campaign ${campaign.id.slice(0, 6)}...${campaign.id.slice(-4)}`,
-            description: 'Campaign details are being loaded...',
-            businessName: `Business ${campaign.owner.slice(0, 6)}...${campaign.owner.slice(-4)}`,
+            title: `Loan ${loan.id.slice(0, 6)}...${loan.id.slice(-4)}`,
+            description: 'Loan details are being loaded...',
+            businessName: loan.borrower?.name || `Business ${loan.borrower?.address.slice(0, 6)}...${loan.borrower?.address.slice(-4)}`,
             image: ''
           };
         }
 
         return {
-          address: campaign.id as `0x${string}`,
-          campaignId: campaign.campaignId,
-          owner: campaign.owner,
-          fundingGoal: campaign.fundingGoal?.toString() || '0',
-          totalFunded: campaign.totalFunded?.toString() || '0',
-          deadline: campaign.deadline?.toString() || '0',
-          revenueSharePercent: parseInt(campaign.revenueSharePercent?.toString() || '500'), // Default 5%
-          repaymentCap: parseInt(campaign.repaymentCap?.toString() || '15000'), // Default 1.5x
-          fundingActive: campaign.fundingActive ?? true,
-          repaymentActive: campaign.repaymentActive ?? false,
-          backerCount: campaign.investorCount || 0,
-          createdAt: campaign.createdAt,
+          address: loan.address as `0x${string}`,
+          id: loan.id,
+          loanAmount: loan.loanAmount?.toString() || '0',
+          totalFunded: loan.totalFunded?.toString() || '0',
+          fundingDeadline: loan.fundingDeadline?.toString() || '0',
+          fundingActive: loan.fundingActive ?? true,
+          loanDisbursed: loan.loanDisbursed ?? false,
+          loanFullyRepaid: loan.loanFullyRepaid ?? false,
+          totalRepaid: loan.totalRepaid?.toString() || '0',
+          backerCount: 0, // TODO: Calculate from contributions
+          createdAt: loan.createdAt,
+          borrower: loan.borrower,
           metadata,
         };
       });
@@ -176,71 +179,16 @@ export function useCampaigns() {
       const results = await Promise.all(campaignPromises);
       setCampaigns(results);
     } catch (e) {
-      console.error('Failed to process campaigns, using fallback data:', e);
-      // If processing fails, at least show mock data
-      setMockCampaigns();
+      console.error('Failed to process loans:', e);
+      setCampaigns([]);
     }
   };
 
-  const setMockCampaigns = () => {
-    const mockCampaigns: Campaign[] = [
-      {
-        address: '0x1234567890123456789012345678901234567890' as `0x${string}`,
-        owner: '0x0987654321098765432109876543210987654321',
-        fundingGoal: '50000000000',
-        totalFunded: '32500000000',
-        deadline: (Date.now() / 1000 + 86400 * 30).toString(), // 30 days from now
-        revenueSharePercent: 500, // 5%
-        repaymentCap: 15000, // 1.5x
-        fundingActive: true,
-        repaymentActive: false,
-        backerCount: 23,
-        createdAt: (Date.now() / 1000 - 86400 * 14).toString(), // 14 days ago
-        metadata: {
-          title: 'Expand E-commerce Platform',
-          description: 'We\'re looking to raise capital to expand our e-commerce platform into new markets and add AI-powered recommendation features.',
-          businessName: 'TechFlow Commerce',
-          website: 'https://techflow.com',
-          image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop',
-          creditScore: {
-            score: 750,
-            riskLevel: 'Low'
-          }
-        }
-      },
-      {
-        address: '0x2345678901234567890123456789012345678901' as `0x${string}`,
-        owner: '0x1876543210987654321098765432109876543210',
-        fundingGoal: '25000000000',
-        totalFunded: '18750000000',
-        deadline: (Date.now() / 1000 + 86400 * 45).toString(), // 45 days from now
-        revenueSharePercent: 600, // 6%
-        repaymentCap: 20000, // 2x
-        fundingActive: true,
-        repaymentActive: false,
-        backerCount: 15,
-        createdAt: (Date.now() / 1000 - 86400 * 7).toString(), // 7 days ago
-        metadata: {
-          title: 'SaaS Platform Scale-Up',
-          description: 'Growing our B2B SaaS platform to handle enterprise clients and expand our feature set with advanced analytics.',
-          businessName: 'DataFlow Solutions',
-          website: 'https://dataflow.io',
-          image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop',
-          creditScore: {
-            score: 680,
-            riskLevel: 'Medium'
-          }
-        }
-      }
-    ];
-    
-    setCampaigns(mockCampaigns);
-  };
 
-  return { 
-    campaigns, 
-    loading: loading && !error, // Don't show loading if we have an error and fallback data
-    error: error && campaigns.length === 0 ? error.message : null, // Only show error if no fallback data
-    refetch 
+  return {
+    campaigns,
+    loading,
+    error: error ? error.message : null,
+    refetch
   };
 }

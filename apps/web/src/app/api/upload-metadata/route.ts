@@ -2,8 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('API: Received upload request');
+
+    // Check if API keys are configured
+    if (!process.env.PINATA_API_KEY || !process.env.PINATA_SECRET_KEY) {
+      console.error('API: Missing Pinata API keys');
+      return NextResponse.json(
+        { error: 'Pinata API keys not configured' },
+        { status: 500 }
+      );
+    }
+
     const metadata = await request.json();
-    
+    console.log('API: Metadata to upload:', JSON.stringify(metadata, null, 2));
+
     const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
       method: 'POST',
       headers: {
@@ -23,16 +35,21 @@ export async function POST(request: NextRequest) {
       }),
     });
 
+    console.log('API: Pinata response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Pinata API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('API: Pinata error response:', errorText);
+      throw new Error(`Pinata API error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
+    console.log('API: Pinata success result:', result);
     return NextResponse.json({ hash: result.IpfsHash });
   } catch (error) {
-    console.error('Error uploading metadata to IPFS:', error);
+    console.error('API: Error uploading metadata to IPFS:', error);
     return NextResponse.json(
-      { error: 'Failed to upload metadata to IPFS' },
+      { error: `Failed to upload metadata to IPFS: ${error.message}` },
       { status: 500 }
     );
   }

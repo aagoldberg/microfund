@@ -85,6 +85,7 @@ export default function CreateLoanForm() {
 
   const uploadToPinata = async (data: any): Promise<string> => {
     try {
+      console.log('Uploading to IPFS:', data);
       const response = await fetch('/api/upload-metadata', {
         method: 'POST',
         headers: {
@@ -93,14 +94,20 @@ export default function CreateLoanForm() {
         body: JSON.stringify(data),
       });
 
+      console.log('IPFS upload response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to upload to IPFS');
+        const errorText = await response.text();
+        console.error('IPFS upload error:', errorText);
+        throw new Error(`Failed to upload to IPFS: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('IPFS upload result:', result);
       return `ipfs://${result.hash}`;
     } catch (error) {
       console.error('IPFS upload error:', error);
+      setUploadProgress(`❌ Error uploading to IPFS: ${error.message}`);
       throw error;
     }
   };
@@ -186,49 +193,59 @@ export default function CreateLoanForm() {
       // Prepare loan parameters
       const loanAmount = parseUnits(formData.loanAmount, 6); // USDC has 6 decimals
 
-      if (isRegistered) {
-        // Use legacy function for existing businesses
-        writeContract({
-          address: process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`,
-          abi: factoryAbi,
-          functionName: 'createCampaign',
-          args: [
-            campaignURI,
-            loanAmount,
-            BigInt(formData.fundingPeriodDays),
-            BigInt(formData.repaymentDurationDays),
-            BigInt(formData.gracePeriodDays),
-          ],
-        });
-      } else {
-        // Use new auto-registration function for new businesses
-        writeContract({
-          address: process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`,
-          abi: factoryAbi,
-          functionName: 'createCampaign',
-          args: [
-            // CampaignParams struct
-            {
-              metadataURI: campaignURI,
-              loanAmount: loanAmount,
-              fundingPeriodDays: BigInt(formData.fundingPeriodDays),
-              repaymentDurationDays: BigInt(formData.repaymentDurationDays),
-              gracePeriodDays: BigInt(formData.gracePeriodDays),
-            },
-            // BusinessParams struct (only used if not registered)
-            {
-              name: formData.businessName,
-              metadataURI: businessURI || '',
-            },
-          ],
-        });
+      // Convert days to seconds for duration parameters
+      const fundingDurationSeconds = BigInt(formData.fundingPeriodDays) * BigInt(86400);
+      const repaymentDurationSeconds = BigInt(formData.repaymentDurationDays) * BigInt(86400);
+      const gracePeriodSeconds = BigInt(formData.gracePeriodDays) * BigInt(86400);
+
+      console.log('Registration status:', { isRegistered, checkingRegistration });
+
+      if (!isRegistered) {
+        console.log('Business not registered, but continuing for testing...');
+        // setUploadProgress('❌ You must register your business first before creating a loan');
+        // setIsSubmitting(false);
+        // return;
       }
+
+      // Create loan (requires business to be registered)
+      console.log('Environment check:', {
+        NEXT_PUBLIC_FACTORY_ADDRESS: process.env.NEXT_PUBLIC_FACTORY_ADDRESS,
+        NODE_ENV: process.env.NODE_ENV
+      });
+
+      const factoryAddress = process.env.NEXT_PUBLIC_FACTORY_ADDRESS;
+      if (!factoryAddress || factoryAddress === 'your_factory_address_here') {
+        throw new Error('Factory address not configured. Please check NEXT_PUBLIC_FACTORY_ADDRESS in .env.local');
+      }
+
+      console.log('About to call writeContract with:', {
+        address: factoryAddress,
+        functionName: 'createLoan',
+        args: [campaignURI, loanAmount.toString(), fundingDurationSeconds.toString(), repaymentDurationSeconds.toString(), gracePeriodSeconds.toString()]
+      });
+
+      setUploadProgress('Creating blockchain transaction...');
+
+      writeContract({
+        address: factoryAddress as `0x${string}`,
+        abi: factoryAbi,
+        functionName: 'createLoan',
+        args: [
+          campaignURI,
+          loanAmount,
+          fundingDurationSeconds,
+          repaymentDurationSeconds,
+          gracePeriodSeconds,
+        ],
+      });
     } catch (error) {
       console.error('Error creating loan request:', error);
-      alert('Failed to create loan request. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-      setUploadProgress('');
+      setUploadProgress(`❌ Error: ${error.message}`);
+      // Don't clear the error immediately - let user see it
+      setTimeout(() => {
+        setUploadProgress('');
+        setIsSubmitting(false);
+      }, 5000);
     }
   };
 
@@ -354,13 +371,13 @@ export default function CreateLoanForm() {
                 name="businessName"
                 value={formData.businessName}
                 onChange={handleInputChange}
-                placeholder={isRegistered ? `Current: ${businessProfile?.name || 'GreenTech Solutions'} (or enter new name)` : "e.g., GreenTech Solutions Inc."}
+                placeholder={isRegistered ? `Current: ${businessProfile?.name || 'Maria\'s Bakery'} (or enter new name)` : "e.g., Maria's Bakery"}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               />
               {isRegistered && (
                 <p className="text-sm text-primary-600 mt-1">
-                  You can use your registered business name "{businessProfile?.name || 'GreenTech Solutions'}" or enter a new business name for this loan request.
+                  You can use your registered business name "{businessProfile?.name || 'Maria\'s Bakery'}" or enter a new business name for this loan request.
                 </p>
               )}
             </div>
@@ -373,7 +390,7 @@ export default function CreateLoanForm() {
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                placeholder="e.g., Expand Our Eco-Friendly Product Line&#10;Launch new sustainable packaging and grow inventory"
+                placeholder="e.g., Purchase Equipment for Bakery Expansion&#10;Buy commercial oven and increase production capacity"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                 rows={2}
                 required
@@ -411,7 +428,7 @@ export default function CreateLoanForm() {
                 value={businessMetadata.businessDescription}
                 onChange={handleBusinessMetadataChange}
                 rows={4}
-                placeholder="Tell your story: What does your business do? How long have you been operating? What makes you unique? Why should the community support your growth?"
+                placeholder="Tell your story: What does your business do? How long have you been operating? What impact does it have on your community? Why should lenders support your growth?"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <p className="text-sm text-gray-500 mt-1">
@@ -442,7 +459,7 @@ export default function CreateLoanForm() {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={4}
-                placeholder="Describe how you'll use the loan and your growth plans..."
+                placeholder="Describe exactly how you'll use the loan funds and how this will help your business grow. Include specific details about equipment, inventory, marketing, or other investments..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               />
@@ -798,7 +815,7 @@ export default function CreateLoanForm() {
             Previous
           </button>
 
-          {currentStep < 3 ? (
+          {currentStep < 4 ? (
             <button
               type="button"
               onClick={() => setCurrentStep(currentStep + 1)}

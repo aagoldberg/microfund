@@ -94,11 +94,11 @@ export default function DashboardPage() {
   const sortedCampaigns = [...filteredCampaigns].sort((a, b) => {
     switch (sort) {
       case 'recent':
-        return Number(b.deadline) - Number(a.deadline);
+        return Number(b.fundingDeadline) - Number(a.fundingDeadline);
       case 'raised':
         return Number(b.totalFunded) - Number(a.totalFunded);
       case 'goal':
-        return Number(b.fundingGoal) - Number(a.fundingGoal);
+        return Number(b.loanAmount) - Number(a.loanAmount);
       case 'backers':
         return (b.backerCount || 0) - (a.backerCount || 0);
       default:
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                 Business Dashboard
               </h1>
               <p className="mt-2 text-gray-600">
-                Manage and track your revenue-based financing campaigns
+                Manage and track your microloan campaigns
               </p>
             </div>
             
@@ -219,7 +219,7 @@ export default function DashboardPage() {
               {filter === 'all' ? 'No campaigns yet' : `No ${filter} campaigns`}
             </h3>
             <p className="text-gray-600 mb-6">
-              Create your first Jama campaign to start raising capital
+              Create your first microloan campaign to access funding
             </p>
             <Link
               href="/create-campaign"

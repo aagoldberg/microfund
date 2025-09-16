@@ -31,7 +31,7 @@ const client = new ApolloClient({
     link: httpLink,
     cache: new InMemoryCache({
       typePolicies: {
-        MicroLoan: {
+        Loan: {
           fields: {
             loanAmount: {
               read(existing) {

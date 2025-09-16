@@ -7,10 +7,22 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApolloProvider } from '@apollo/client';
 import { getClient } from '@/lib/apollo';
 import { http } from 'viem';
+import { metaMask, coinbaseWallet, walletConnect, injected } from 'wagmi/connectors';
 import { PaymentProvider } from './payment/PaymentProvider';
 
 const wagmiConfig = createConfig({
   chains: [baseSepolia],
+  connectors: [
+    metaMask(),
+    injected(),
+    coinbaseWallet({
+      appName: 'Yunus',
+      appLogoUrl: 'https://your-logo-url.com',
+    }),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
+    }),
+  ],
   transports: {
     [baseSepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL),
   },
@@ -26,13 +38,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
         config={{
           appearance: {
             theme: 'light',
-            accentColor: '#2563eb',
+            accentColor: '#059669', // jade green to match theme
           },
           defaultChain: baseSepolia,
           supportedChains: [baseSepolia],
           embeddedWallets: {
             createOnLogin: 'users-without-wallets',
           },
+          externalWallets: {
+            metamask: {},
+            coinbaseWallet: {},
+            walletConnect: {},
+          },
+          loginMethods: ['wallet'],
         }}
       >
         <QueryClientProvider client={queryClient}>

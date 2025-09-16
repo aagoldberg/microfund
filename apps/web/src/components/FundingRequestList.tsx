@@ -53,13 +53,13 @@ function FundingRequestCard({ campaign }: { campaign: EnhancedCampaign }) {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   
   const formattedTotal = formatUnits(BigInt(campaign.totalFunded || '0'), USDC_DECIMALS);
-  const formattedGoal = formatUnits(BigInt(campaign.fundingGoal || '0'), USDC_DECIMALS);
-  const progressPercentage = campaign.fundingGoal && Number(campaign.fundingGoal) > 0 
-    ? (Number(campaign.totalFunded || '0') / Number(campaign.fundingGoal)) * 100 
+  const formattedGoal = formatUnits(BigInt(campaign.loanAmount || '0'), USDC_DECIMALS);
+  const progressPercentage = campaign.loanAmount && Number(campaign.loanAmount) > 0
+    ? (Number(campaign.totalFunded || '0') / Number(campaign.loanAmount)) * 100
     : 0;
-  
+
   // Calculate time remaining
-  const daysRemaining = campaign.deadline ? Math.max(0, Math.floor((Number(campaign.deadline) - Date.now() / 1000) / 86400)) : 0;
+  const daysRemaining = campaign.fundingDeadline ? Math.max(0, Math.floor((Number(campaign.fundingDeadline) - Date.now() / 1000) / 86400)) : 0;
   const isActive = campaign.fundingActive;
   const isFullyFunded = progressPercentage >= 100;
 
@@ -235,7 +235,7 @@ function FundingRequestCard({ campaign }: { campaign: EnhancedCampaign }) {
                   // Share functionality
                   const shareData = {
                     title: campaign.metadata?.title || 'Support this campaign',
-                    text: `Check out ${campaign.metadata?.businessName || 'this business'} on Jama`,
+                    text: `Check out ${campaign.metadata?.businessName || 'this business'} on Yunus`,
                     url: `${window.location.origin}/campaign/${campaign.address}`
                   };
                   if (navigator.share && navigator.canShare(shareData)) {
