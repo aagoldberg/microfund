@@ -42,8 +42,8 @@ export default function FundingSuccessPage() {
 
     const USDC_DECIMALS = 6;
     const formattedTotal = formatUnits(BigInt(campaign.totalFunded || '0'), USDC_DECIMALS);
-    const formattedGoal = formatUnits(BigInt(campaign.fundingGoal || '0'), USDC_DECIMALS);
-    const progressPercentage = (Number(campaign.totalFunded) / Number(campaign.fundingGoal)) * 100;
+    const formattedGoal = formatUnits(BigInt(campaign.loanAmount || '0'), USDC_DECIMALS);
+    const progressPercentage = (Number(campaign.totalFunded) / Number(campaign.loanAmount)) * 100;
     const daysLeft = Math.max(0, Math.floor((Number(campaign.deadline) * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
 
     const shareData: CampaignShareData = {
@@ -121,7 +121,10 @@ export default function FundingSuccessPage() {
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
-                                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                                            const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                                            if (nextElement) {
+                                                nextElement.style.display = 'flex';
+                                            }
                                         }}
                                     />
                                 ) : null}
@@ -178,7 +181,7 @@ export default function FundingSuccessPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <button
                             onClick={() => {
-                                const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/campaign/${campaignId}`)}&quote=${encodeURIComponent(`Check out ${campaign.metadata?.businessName} on Jama! Help them reach their funding goal.`)}`;
+                                const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/campaign/${campaignId}`)}&quote=${encodeURIComponent(`Check out ${campaign.metadata?.businessName} on Yunus! Help them reach their funding goal.`)}`;
                                 window.open(shareUrl, '_blank', 'noopener,noreferrer');
                             }}
                             className="bg-[#1877F2] hover:bg-[#1565C0] text-white px-4 py-3 rounded-xl font-semibold transition-colors inline-flex items-center justify-center gap-2"
@@ -219,7 +222,7 @@ export default function FundingSuccessPage() {
                         
                         <button
                             onClick={() => {
-                                const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out ${campaign.metadata?.businessName} on Jama! Help them reach their funding goal. ${window.location.origin}/campaign/${campaignId}`)}`;
+                                const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(`Check out ${campaign.metadata?.businessName} on Yunus! Help them reach their funding goal. ${window.location.origin}/campaign/${campaignId}`)}`;
                                 window.open(shareUrl, '_blank', 'noopener,noreferrer');
                             }}
                             className="bg-[#855DCD] hover:bg-[#7A56C2] text-white px-4 py-3 rounded-xl font-semibold transition-colors inline-flex items-center justify-center gap-2"

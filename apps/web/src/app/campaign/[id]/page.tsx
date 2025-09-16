@@ -38,7 +38,7 @@ export default function CampaignPage() {
         </div>
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-8 space-y-6">
-            <FundingCard campaignId={id} onFundClick={handleFundClick} />
+            <FundingCard loanId={id} onLendClick={handleFundClick} />
             
             
             <CampaignAnalytics 

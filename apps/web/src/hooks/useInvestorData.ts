@@ -29,7 +29,7 @@ export interface LenderSummary {
   completedLoans: number;
 }
 
-export function useLenderData() {
+export function useInvestorData() {
   const { address, isConnected } = useAccount();
   const { loans } = useEnhancedLoans();
   const [loansList, setLoansList] = useState<LenderLoan[]>([]);
@@ -194,7 +194,7 @@ export function useLenderData() {
   };
 
   // Get loans by status
-  const getLoansByStatus = (status: 'funding' | 'active' | 'completed') => {
+  const getInvestmentsByStatus = (status: 'funding' | 'active' | 'completed') => {
     return loansList.filter(loan => loan.status === status);
   };
 
@@ -211,7 +211,7 @@ export function useLenderData() {
     loading,
     error,
     formatCurrency,
-    getLoansByStatus,
+    getInvestmentsByStatus,
     refetch,
     isConnected: isConnected && !!address,
   };

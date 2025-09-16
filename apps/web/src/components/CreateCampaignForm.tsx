@@ -107,7 +107,8 @@ export default function CreateLoanForm() {
       return `ipfs://${result.hash}`;
     } catch (error) {
       console.error('IPFS upload error:', error);
-      setUploadProgress(`❌ Error uploading to IPFS: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setUploadProgress(`❌ Error uploading to IPFS: ${errorMessage}`);
       throw error;
     }
   };
@@ -240,7 +241,8 @@ export default function CreateLoanForm() {
       });
     } catch (error) {
       console.error('Error creating loan request:', error);
-      setUploadProgress(`❌ Error: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setUploadProgress(`❌ Error: ${errorMessage}`);
       // Don't clear the error immediately - let user see it
       setTimeout(() => {
         setUploadProgress('');
@@ -855,7 +857,7 @@ export default function CreateLoanForm() {
 
       {error && (
         <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error.message}</p>
+          <p className="text-red-800">{error instanceof Error ? error.message : String(error)}</p>
         </div>
       )}
     </div>

@@ -48,8 +48,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ hash: result.IpfsHash });
   } catch (error) {
     console.error('API: Error uploading metadata to IPFS:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: `Failed to upload metadata to IPFS: ${error.message}` },
+      { error: `Failed to upload metadata to IPFS: ${errorMessage}` },
       { status: 500 }
     );
   }

@@ -144,12 +144,12 @@ export default function FundPage() {
                                 <span className="font-medium">{campaign.metadata?.businessName || 'Unknown'}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Revenue Share:</span>
-                                <span className="font-medium text-sky-600">{(campaign.revenueSharePercent / 100) || 5}%</span>
+                                <span className="text-gray-600">Interest Rate:</span>
+                                <span className="font-medium text-green-600">0% (Zero Interest)</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Max Repayment:</span>
-                                <span className="font-medium text-green-600">{(campaign.repaymentCap / 10000) || 1.5}x</span>
+                                <span className="text-gray-600">Repayment:</span>
+                                <span className="font-medium text-green-600">Principal Only</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-gray-600">Duration:</span>
@@ -162,7 +162,7 @@ export default function FundPage() {
                 {/* Funding Form */}
                 <FundingForm
                     campaignId={campaignId}
-                    campaignNumericId={campaign.campaignId || campaignId}
+                    campaignNumericId={campaignId}
                     onSuccess={handleSuccess}
                     onError={handleError}
                 />

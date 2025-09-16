@@ -93,10 +93,35 @@ interface HealthScoreProgressProps {
   improvements?: string[];
 }
 
-export function HealthScoreProgress({ 
-  currentScore, 
-  targetScore = BigInt(8000), 
-  improvements = [] 
+interface RiskBadgeProps {
+  riskLevel: 'Low' | 'Medium' | 'High';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export function RiskBadge({ riskLevel, size = 'md' }: RiskBadgeProps) {
+  const colors = {
+    Low: 'text-green-700 bg-green-100 border-green-200',
+    Medium: 'text-yellow-700 bg-yellow-100 border-yellow-200',
+    High: 'text-red-700 bg-red-100 border-red-200',
+  };
+
+  const sizes = {
+    sm: 'text-xs px-2 py-1',
+    md: 'text-sm px-3 py-1',
+    lg: 'text-base px-4 py-2',
+  };
+
+  return (
+    <span className={`inline-flex items-center rounded-full border font-medium ${colors[riskLevel]} ${sizes[size]}`}>
+      {riskLevel} Risk
+    </span>
+  );
+}
+
+export function HealthScoreProgress({
+  currentScore,
+  targetScore = BigInt(8000),
+  improvements = []
 }: HealthScoreProgressProps) {
   const currentPercentage = Number(currentScore) / 100;
   const targetPercentage = Number(targetScore) / 100;

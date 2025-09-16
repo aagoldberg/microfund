@@ -54,11 +54,11 @@ function CampaignRepaymentCard({ campaign }: { campaign: CampaignRepaymentData }
       // Wait a bit for approval
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Then submit revenue share
+      // Then make loan repayment
       await writeContract({
         address: campaign.address,
         abi: campaignAbi,
-        functionName: 'submitRevenueShare',
+        functionName: 'makeRepayment',
         args: [parseUnits(monthlyRevenue, TOKEN_CONFIG.USDC.decimals)],
       });
     } catch (error) {
