@@ -5,6 +5,7 @@ import {
   RepaymentMade,
   LoanRepaid,
   CampaignRefunded,
+  ReturnsWithdrawn,
   MetadataUpdated
 } from '../generated/templates/MicroLoan/MicroLoan'
 import { Loan, Contribution, Repayment, Lender, GlobalStats } from '../generated/schema'
@@ -19,6 +20,7 @@ export function handleContributed(event: Contributed): void {
     lender.address = event.params.contributor
     lender.totalContributed = BigInt.fromI32(0)
     lender.totalReturned = BigInt.fromI32(0)
+    lender.totalWithdrawn = BigInt.fromI32(0)
     lender.activeLoans = BigInt.fromI32(0)
 
     // Update global stats for new lender
@@ -130,6 +132,23 @@ export function handleCampaignRefunded(event: CampaignRefunded): void {
     lender.totalReturned = lender.totalReturned.plus(event.params.amount)
     lender.activeLoans = lender.activeLoans.minus(BigInt.fromI32(1))
     lender.save()
+  }
+}
+
+export function handleReturnsWithdrawn(event: ReturnsWithdrawn): void {
+  let loan = Loan.load(event.address.toHex())
+  if (loan) {
+    // Update loan statistics
+    loan.totalWithdrawn = loan.totalWithdrawn.plus(event.params.amount)
+    loan.save()
+
+    // Update lender statistics
+    let lenderId = event.address.toHex() + "-" + event.params.contributor.toHex()
+    let lender = Lender.load(lenderId)
+    if (lender) {
+      lender.totalWithdrawn = lender.totalWithdrawn.plus(event.params.amount)
+      lender.save()
+    }
   }
 }
 

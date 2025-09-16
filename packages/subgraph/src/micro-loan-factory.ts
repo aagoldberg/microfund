@@ -40,6 +40,7 @@ export function handleLoanCreated(event: LoanCreated): void {
   loan.gracePeriod = event.params.gracePeriod
   loan.totalFunded = BigInt.fromI32(0)
   loan.totalRepaid = BigInt.fromI32(0)
+  loan.totalWithdrawn = BigInt.fromI32(0)
   loan.fundingActive = true
   loan.loanDisbursed = false
   loan.loanFullyRepaid = false

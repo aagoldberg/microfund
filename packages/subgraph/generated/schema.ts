@@ -9,7 +9,6 @@ import {
   Bytes,
   BigInt,
   BigDecimal,
-  Int8,
 } from "@graphprotocol/graph-ts";
 
 export class Business extends Entity {
@@ -407,6 +406,19 @@ export class Loan extends Entity {
     this.set("totalRepaid", Value.fromBigInt(value));
   }
 
+  get totalWithdrawn(): BigInt {
+    let value = this.get("totalWithdrawn");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set totalWithdrawn(value: BigInt) {
+    this.set("totalWithdrawn", Value.fromBigInt(value));
+  }
+
   get fundingActive(): boolean {
     let value = this.get("fundingActive");
     if (!value || value.kind == ValueKind.NULL) {
@@ -781,6 +793,19 @@ export class Lender extends Entity {
 
   set totalReturned(value: BigInt) {
     this.set("totalReturned", Value.fromBigInt(value));
+  }
+
+  get totalWithdrawn(): BigInt {
+    let value = this.get("totalWithdrawn");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set totalWithdrawn(value: BigInt) {
+    this.set("totalWithdrawn", Value.fromBigInt(value));
   }
 
   get activeLoans(): BigInt {

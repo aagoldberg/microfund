@@ -148,6 +148,28 @@ export class RepaymentMade__Params {
   }
 }
 
+export class ReturnsWithdrawn extends ethereum.Event {
+  get params(): ReturnsWithdrawn__Params {
+    return new ReturnsWithdrawn__Params(this);
+  }
+}
+
+export class ReturnsWithdrawn__Params {
+  _event: ReturnsWithdrawn;
+
+  constructor(event: ReturnsWithdrawn) {
+    this._event = event;
+  }
+
+  get contributor(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
 export class MicroLoan extends ethereum.SmartContract {
   static bind(address: Address): MicroLoan {
     return new MicroLoan("MicroLoan", address);
@@ -288,6 +310,29 @@ export class MicroLoan extends ethereum.SmartContract {
       "fundingDeadline",
       "fundingDeadline():(uint256)",
       [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  getAvailableReturns(contributor: Address): BigInt {
+    let result = super.call(
+      "getAvailableReturns",
+      "getAvailableReturns(address):(uint256)",
+      [ethereum.Value.fromAddress(contributor)],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_getAvailableReturns(contributor: Address): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "getAvailableReturns",
+      "getAvailableReturns(address):(uint256)",
+      [ethereum.Value.fromAddress(contributor)],
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -603,6 +648,29 @@ export class MicroLoan extends ethereum.SmartContract {
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
+
+  withdrawnAmounts(param0: Address): BigInt {
+    let result = super.call(
+      "withdrawnAmounts",
+      "withdrawnAmounts(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_withdrawnAmounts(param0: Address): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "withdrawnAmounts",
+      "withdrawnAmounts(address):(uint256)",
+      [ethereum.Value.fromAddress(param0)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
 }
 
 export class ConstructorCall extends ethereum.Call {
@@ -847,6 +915,32 @@ export class UpdateMetadataCall__Outputs {
   _call: UpdateMetadataCall;
 
   constructor(call: UpdateMetadataCall) {
+    this._call = call;
+  }
+}
+
+export class WithdrawAvailableReturnsCall extends ethereum.Call {
+  get inputs(): WithdrawAvailableReturnsCall__Inputs {
+    return new WithdrawAvailableReturnsCall__Inputs(this);
+  }
+
+  get outputs(): WithdrawAvailableReturnsCall__Outputs {
+    return new WithdrawAvailableReturnsCall__Outputs(this);
+  }
+}
+
+export class WithdrawAvailableReturnsCall__Inputs {
+  _call: WithdrawAvailableReturnsCall;
+
+  constructor(call: WithdrawAvailableReturnsCall) {
+    this._call = call;
+  }
+}
+
+export class WithdrawAvailableReturnsCall__Outputs {
+  _call: WithdrawAvailableReturnsCall;
+
+  constructor(call: WithdrawAvailableReturnsCall) {
     this._call = call;
   }
 }

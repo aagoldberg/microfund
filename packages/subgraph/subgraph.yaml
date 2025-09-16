@@ -6,7 +6,7 @@ dataSources:
     name: BusinessRegistry
     network: base-sepolia
     source:
-      address: "0xf3AB2Dbcc4Ef09Cca4aD23C2A499bf4C1Ac7eD2C"
+      address: "0xe37d471C5d34F5604A7723dCD5A318cBaFfB72E8"
       abi: BusinessRegistry
       startBlock: 0
     mapping:
@@ -32,7 +32,7 @@ dataSources:
     name: MicroLoanFactory
     network: base-sepolia
     source:
-      address: "0xf36ADFf8e8C634658e5Fc16F10419e565Ac2005A"
+      address: "0xda4F8053643bB207D5f3711b8E3f70b89c3D945A"
       abi: MicroLoanFactory
       startBlock: 0
     mapping:
@@ -81,6 +81,8 @@ templates:
           handler: handleLoanRepaid
         - event: CampaignRefunded(indexed address,uint256)
           handler: handleCampaignRefunded
+        - event: ReturnsWithdrawn(indexed address,uint256)
+          handler: handleReturnsWithdrawn
         - event: MetadataUpdated(string)
           handler: handleMetadataUpdated
       file: ./src/micro-loan.ts
