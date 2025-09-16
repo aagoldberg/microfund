@@ -37,7 +37,7 @@ export default function LoanCard({ loanId, onLendClick }: LoanCardProps) {
   const formattedLoanAmount = formatUnits(BigInt(loan.loanAmount || '0'), USDC_DECIMALS);
   const progressPercentage = (Number(loan.totalFunded) / Number(loan.loanAmount)) * 100;
   const remainingAmount = Number(formattedLoanAmount) - Number(formattedTotalFunded);
-  const daysLeft = Math.max(0, Math.floor((Number(loan.deadline) * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
+  const daysLeft = Math.max(0, Math.floor((Number(loan.fundingDeadline) * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
 
 
 
@@ -93,14 +93,14 @@ export default function LoanCard({ loanId, onLendClick }: LoanCardProps) {
           <div className="text-center flex-1">
             <div className="text-xs text-gray-500 mb-0.5">Duration</div>
             <div className="font-semibold text-sm text-gray-900">
-              {Math.floor((loan.repaymentDurationDays || 365) / 30)} months
+              12 months
             </div>
           </div>
           <div className="w-px h-8 bg-gray-300 mx-2"></div>
           <div className="text-center flex-1">
             <div className="text-xs text-gray-500 mb-0.5">Grace Period</div>
             <div className="font-semibold text-sm text-gray-900">
-              {loan.gracePeriodDays || 30} days
+              30 days
             </div>
           </div>
         </div>

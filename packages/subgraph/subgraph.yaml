@@ -1,0 +1,86 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: BusinessRegistry
+    network: base-sepolia
+    source:
+      address: "0xf3AB2Dbcc4Ef09Cca4aD23C2A499bf4C1Ac7eD2C"
+      abi: BusinessRegistry
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Business
+      abis:
+        - name: BusinessRegistry
+          file: ./abis/BusinessRegistry.json
+      eventHandlers:
+        - event: BusinessRegistered(indexed address,string,string,uint256)
+          handler: handleBusinessRegistered
+        - event: BusinessVerified(indexed address,indexed address,uint256)
+          handler: handleBusinessVerified
+        - event: BusinessMetadataUpdated(indexed address,string,string,uint256)
+          handler: handleBusinessMetadataUpdated
+        - event: BusinessMetricsUpdated(indexed address,uint256,uint256,uint256)
+          handler: handleBusinessMetricsUpdated
+      file: ./src/business-registry.ts
+  - kind: ethereum
+    name: MicroLoanFactory
+    network: base-sepolia
+    source:
+      address: "0xf36ADFf8e8C634658e5Fc16F10419e565Ac2005A"
+      abi: MicroLoanFactory
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: MicroLoanFactory
+          file: ./abis/MicroLoanFactory.json
+        - name: MicroLoan
+          file: ./abis/MicroLoan.json
+      eventHandlers:
+        - event: LoanCreated(indexed address,indexed address,uint256,uint256,uint256,uint256)
+          handler: handleLoanCreated
+      file: ./src/micro-loan-factory.ts
+templates:
+  - kind: ethereum
+    name: MicroLoan
+    network: base-sepolia
+    source:
+      abi: MicroLoan
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+        - Contribution
+        - Repayment
+        - Lender
+      abis:
+        - name: MicroLoan
+          file: ./abis/MicroLoan.json
+      eventHandlers:
+        - event: Contributed(indexed address,uint256)
+          handler: handleContributed
+        - event: FundingGoalReached(uint256)
+          handler: handleFundingGoalReached
+        - event: LoanDisbursed(uint256)
+          handler: handleLoanDisbursed
+        - event: RepaymentMade(uint256,uint256)
+          handler: handleRepaymentMade
+        - event: LoanRepaid(uint256)
+          handler: handleLoanRepaid
+        - event: CampaignRefunded(indexed address,uint256)
+          handler: handleCampaignRefunded
+        - event: MetadataUpdated(string)
+          handler: handleMetadataUpdated
+      file: ./src/micro-loan.ts

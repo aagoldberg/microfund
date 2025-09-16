@@ -14,8 +14,8 @@ const uniSans = {
 };
 
 export const metadata: Metadata = {
-  title: 'Jama - Revenue-Based Financing',
-  description: 'Fund growing businesses and earn returns from their success through revenue-based financing.',
+  title: 'Yunus - Community Microloans',
+  description: 'Support small businesses with zero-interest microloans. Empowering entrepreneurs, strengthening communities.',
 };
 
 export default function RootLayout({

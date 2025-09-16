@@ -15,7 +15,12 @@ export interface BusinessHealth {
 
 export interface EnhancedLoan {
   address: `0x${string}`;
-  owner: string;
+  borrower?: {
+    id: string;
+    name?: string;
+    address: string;
+    verified: boolean;
+  };
   loanAmount: string;
   totalFunded: string;
   deadline: string;
@@ -54,7 +59,7 @@ export function useEnhancedLoans() {
         try {
           // For now, we'll use the loan owner as the business address
           // In production, this would come from the loan contract or metadata
-          const businessAddress = loan.owner;
+          const businessAddress = loan.borrower?.address;
           
           // Create mock business health data for demonstration
           // In production, these would be actual contract calls
@@ -82,16 +87,24 @@ export function useEnhancedLoans() {
 
           return {
             ...loan,
+            deadline: loan.fundingDeadline,  // Map funding deadline to deadline
+            repaymentDurationDays: 365,  // Default to 12 months
+            gracePeriodDays: 30,  // Default to 30 days grace period
+            repaymentActive: loan.loanDisbursed && !loan.loanFullyRepaid,  // Active if loan is disbursed but not fully repaid
             businessHealth: mockBusinessHealth,
             riskAnalysis,
-          };
+          } as EnhancedLoan;
         } catch (error) {
           console.error(`Failed to enhance loan ${loan.address}:`, error);
           return {
             ...loan,
+            deadline: loan.fundingDeadline,  // Map funding deadline to deadline
+            repaymentDurationDays: 365,  // Default to 12 months
+            gracePeriodDays: 30,  // Default to 30 days grace period
+            repaymentActive: loan.loanDisbursed && !loan.loanFullyRepaid,  // Active if loan is disbursed but not fully repaid
             businessHealth: undefined,
             riskAnalysis: undefined,
-          };
+          } as EnhancedLoan;
         }
       })
     );

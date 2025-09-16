@@ -8,7 +8,7 @@ import { campaignAbi } from '@/abi/campaign';
 interface LendingPaymentOptionsProps {
   loanAddress: string;
   usdcAmount: number;
-  onSuccess?: () => void;
+  onSuccess?: (message: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -45,7 +45,7 @@ export default function LendingPaymentOptions({
       });
 
       if (isSuccess) {
-        onSuccess?.();
+        onSuccess?.(`Successfully contributed $${usdcAmount} USDC to the loan!`);
       }
     } catch (err) {
       console.error('Contribution error:', err);

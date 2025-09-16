@@ -166,7 +166,7 @@ export default function ShareModal({ isOpen, onClose, campaign, customMessage }:
         const shareUrl = shareUrls[platformId];
 
         if (platformId === 'discord') {
-            const success = await copyToClipboard(`${customMessage || `Check out ${campaign.businessName} on Jama!`} ${campaignUrl}`);
+            const success = await copyToClipboard(`${customMessage || `Check out ${campaign.businessName} on Yunus!`} ${campaignUrl}`);
             if (success) {
                 setCopiedPlatform(platformId);
                 setTimeout(() => setCopiedPlatform(null), 2000);

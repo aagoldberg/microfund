@@ -1,0 +1,77 @@
+type Business @entity(immutable: false) {
+  id: ID!
+  address: Bytes!
+  name: String!
+  metadataURI: String!
+  owner: Bytes!
+  verified: Boolean!
+  totalRaised: BigInt!
+  totalRepaid: BigInt!
+  onTimePayments: BigInt!
+  latePayments: BigInt!
+  defaultedAmount: BigInt!
+  campaignCount: BigInt!
+  successfulCampaigns: BigInt!
+  activeInvestors: BigInt!
+  registeredAt: BigInt!
+  lastActivityAt: BigInt!
+  loans: [Loan!]! @derivedFrom(field: "borrower")
+}
+
+type Loan @entity(immutable: false) {
+  id: ID!
+  address: Bytes!
+  borrower: Business!
+  metadataURI: String!
+  loanAmount: BigInt!
+  fundingDeadline: BigInt!
+  repaymentDuration: BigInt!
+  gracePeriod: BigInt!
+  totalFunded: BigInt!
+  totalRepaid: BigInt!
+  fundingActive: Boolean!
+  loanDisbursed: Boolean!
+  loanFullyRepaid: Boolean!
+  createdAt: BigInt!
+  disbursedAt: BigInt
+  contributions: [Contribution!]! @derivedFrom(field: "loan")
+  repayments: [Repayment!]! @derivedFrom(field: "loan")
+}
+
+type Contribution @entity(immutable: true) {
+  id: ID!
+  loan: Loan!
+  contributor: Lender!
+  amount: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Repayment @entity(immutable: true) {
+  id: ID!
+  loan: Loan!
+  amount: BigInt!
+  totalRepaidAfter: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Lender @entity(immutable: false) {
+  id: ID!
+  address: Bytes!
+  totalContributed: BigInt!
+  totalReturned: BigInt!
+  activeLoans: BigInt!
+  contributions: [Contribution!]! @derivedFrom(field: "contributor")
+}
+
+type GlobalStats @entity(immutable: false) {
+  id: ID!
+  totalLoansCreated: BigInt!
+  totalLoansFunded: BigInt!
+  totalLoansRepaid: BigInt!
+  totalAmountLent: BigInt!
+  totalAmountRepaid: BigInt!
+  totalBusinesses: BigInt!
+  totalLenders: BigInt!
+}

@@ -20,9 +20,9 @@ export interface ShareUrlConfig {
 
 export const generateShareUrls = (campaign: CampaignShareData, customMessage?: string): Record<string, string> => {
   const campaignUrl = `${window.location.origin}/campaign/${campaign.id}`;
-  const defaultText = `Support ${campaign.businessName} on Jama - help them reach their $${campaign.goal.toLocaleString()} goal! ${Math.round(campaign.progressPercentage)}% funded so far.`;
+  const defaultText = `Support ${campaign.businessName} on Yunus - help them reach their $${campaign.goal.toLocaleString()} goal! ${Math.round(campaign.progressPercentage)}% funded so far.`;
   const shareText = customMessage || defaultText;
-  const hashtags = 'fundraising,revenue-based-financing,jama,web3';
+  const hashtags = 'microloans,small-business,yunus,web3';
   
   return {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(campaignUrl)}`,

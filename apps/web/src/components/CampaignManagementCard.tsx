@@ -18,15 +18,22 @@ interface CampaignMetadata {
 
 interface Campaign {
   address: `0x${string}`;
-  owner: string;
-  fundingGoal: string;
+  id?: string;
+  loanAmount: string;
   totalFunded: string;
-  deadline: string;
-  revenueSharePercent: number;
-  repaymentCap: number;
+  fundingDeadline: string;
   fundingActive: boolean;
-  repaymentActive: boolean;
+  loanDisbursed: boolean;
+  loanFullyRepaid: boolean;
+  totalRepaid: string;
   backerCount?: number;
+  createdAt?: string;
+  borrower?: {
+    id: string;
+    name?: string;
+    address: string;
+    verified: boolean;
+  };
   metadata: CampaignMetadata | null;
 }
 
@@ -43,10 +50,10 @@ export default function CampaignManagementCard({
 }: CampaignManagementCardProps) {
   const [showActions, setShowActions] = useState(false);
 
-  const progressPercentage = (Number(campaign.totalFunded) / Number(campaign.fundingGoal)) * 100;
-  const daysLeft = Math.max(0, Math.floor((Number(campaign.deadline) * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
+  const progressPercentage = (Number(campaign.totalFunded) / Number(campaign.loanAmount)) * 100;
+  const daysLeft = Math.max(0, Math.floor((Number(campaign.fundingDeadline) * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
   const raised = Number(campaign.totalFunded);
-  const goal = Number(campaign.fundingGoal);
+  const goal = Number(campaign.loanAmount);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-green-300 transition-colors">
@@ -164,12 +171,12 @@ export default function CampaignManagementCard({
           <div className="flex items-center space-x-4">
             <div className="bg-primary-50 px-3 py-1 rounded-full">
               <span className="text-primary-700 font-medium">
-                {(campaign.revenueSharePercent / 100) || 5}% revenue share
+                0% interest rate
               </span>
             </div>
             <div className="bg-purple-50 px-3 py-1 rounded-full">
               <span className="text-purple-700 font-medium">
-                {(campaign.repaymentCap / 10000) || 1.5}x repayment cap
+                Principal-only repayment
               </span>
             </div>
           </div>

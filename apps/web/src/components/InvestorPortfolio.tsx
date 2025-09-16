@@ -11,7 +11,7 @@ const USDC_DECIMALS = 6;
 
 interface PortfolioInvestment {
   campaignId: string;
-  campaignAddress: string;
+  loanAddress: string;
   businessName: string;
   title: string;
   invested: number;
@@ -27,28 +27,28 @@ interface PortfolioInvestment {
 
 export default function InvestorPortfolio() {
   const { address } = useAccount();
-  const { 
-    investments, 
-    summary, 
-    loading, 
-    error, 
-    formatCurrency, 
-    getInvestmentsByStatus 
+  const {
+    loans: investments,
+    summary,
+    loading,
+    error,
+    formatCurrency,
+    getInvestmentsByStatus
   } = useInvestorData();
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
   
-  // Withdraw returns
+  // Withdraw available returns from loan repayments
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
-  
-  const handleWithdraw = async (campaignAddress: string) => {
+
+  const handleWithdraw = async (loanAddress: string) => {
     try {
       writeContract({
-        address: campaignAddress as `0x${string}`,
+        address: loanAddress as `0x${string}`,
         abi: campaignAbi,
-        functionName: 'withdrawReturns',
+        functionName: 'withdrawAvailableReturns',
       });
-      setSelectedCampaign(campaignAddress);
+      setSelectedCampaign(loanAddress);
     } catch (error) {
       console.error('Error withdrawing returns:', error);
       alert('Failed to withdraw returns');
@@ -91,7 +91,7 @@ export default function InvestorPortfolio() {
               </svg>
             </div>
             <p className="text-2xl font-bold text-gray-900">
-              {formatCurrency(summary.totalInvested)}
+              {formatCurrency(summary.totalLent)}
             </p>
           </div>
           
@@ -106,7 +106,7 @@ export default function InvestorPortfolio() {
               {formatCurrency(summary.totalReceived)}
             </p>
             <p className="text-xs text-gray-500">
-              {summary.totalROI > 0 ? '+' : ''}{summary.totalROI.toFixed(1)}% ROI
+              Repayments received
             </p>
           </div>
           
@@ -134,7 +134,7 @@ export default function InvestorPortfolio() {
             </p>
             {summary.totalPending > 0n && (
               <button className="text-xs text-gray-600 hover:text-primary-600 font-medium">
-                Withdraw →
+                Available for withdrawal
               </button>
             )}
           </div>
@@ -162,7 +162,7 @@ export default function InvestorPortfolio() {
           <div className="space-y-3">
             <h4 className="font-medium text-gray-700">Investment Breakdown</h4>
             {investments.slice(0, 5).map((investment, index) => (
-              <div key={investment.campaignAddress} className="flex items-center justify-between">
+              <div key={investment.loanAddress} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${
                     ['bg-green-500', 'bg-primary-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'][index]
@@ -184,20 +184,20 @@ export default function InvestorPortfolio() {
         
         <div className="space-y-4">
           {activeInvestments.map((investment) => (
-            <div key={investment.campaignAddress} className="border border-gray-200 rounded-xl p-4 hover:border-green-300 transition-colors">
+            <div key={investment.loanAddress} className="border border-gray-200 rounded-xl p-4 hover:border-green-300 transition-colors">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <Link 
-                    href={`/campaign/${investment.campaignAddress}`} 
+                    href={`/campaign/${investment.loanAddress}`} 
                     className="font-semibold text-gray-900 hover:text-primary-600"
                   >
-                    {investment.campaignTitle}
+                    {investment.loanTitle}
                   </Link>
                   <p className="text-sm text-gray-500">
                     By {investment.businessName}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {investment.revenueSharePercent}% revenue share · {investment.repaymentCap}x cap
+                    0% interest · Principal-only repayment
                   </p>
                 </div>
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
@@ -216,7 +216,7 @@ export default function InvestorPortfolio() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Expected</p>
-                  <p className="font-medium text-gray-900">{formatCurrency(investment.expectedReturn)}</p>
+                  <p className="font-medium text-gray-900">{formatCurrency(investment.principalAmount)}</p>
                 </div>
               </div>
               
@@ -224,19 +224,19 @@ export default function InvestorPortfolio() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-green-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(Number((investment.totalReceived * 100n) / investment.expectedReturn), 100)}%` }}
+                    style={{ width: `${Math.min(Number((investment.totalReceived * 100n) / investment.principalAmount), 100)}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{Number((investment.totalReceived * 100n) / investment.expectedReturn).toFixed(1)}% returned</p>
+                <p className="text-xs text-gray-500 mt-1">{Number((investment.totalReceived * 100n) / investment.principalAmount).toFixed(1)}% returned</p>
               </div>
               
-              {investment.pendingReturns > 0n && (
+              {investment.pendingRepayment > 0n && (
                 <button
-                  onClick={() => handleWithdraw(investment.campaignAddress)}
+                  onClick={() => handleWithdraw(investment.loanAddress)}
                   disabled={isPending || isConfirming}
                   className="w-full bg-primary-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {isPending || isConfirming ? 'Processing...' : `Withdraw ${formatCurrency(investment.pendingReturns)}`}
+                  {isPending || isConfirming ? 'Processing...' : `Withdraw ${formatCurrency(investment.pendingRepayment)}`}
                 </button>
               )}
             </div>
@@ -268,9 +268,9 @@ export default function InvestorPortfolio() {
               const roi = ((Number(investment.totalReceived) / Number(investment.contribution) - 1) * 100).toFixed(1);
               
               return (
-                <div key={investment.campaignAddress} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={investment.loanAddress} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">{investment.campaignTitle}</p>
+                    <p className="font-medium text-gray-900">{investment.loanTitle}</p>
                     <p className="text-sm text-gray-500">
                       By {investment.businessName}
                     </p>
@@ -287,7 +287,7 @@ export default function InvestorPortfolio() {
           </div>
         </div>
       )}
-      
+
       {/* Success message */}
       {isSuccess && selectedCampaign && (
         <div className="fixed bottom-4 right-4 bg-green-50 border border-green-200 rounded-xl p-4 shadow-lg">

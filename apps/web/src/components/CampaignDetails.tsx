@@ -48,7 +48,7 @@ export default function CampaignDetails({ campaignId }: CampaignDetailsProps) {
     { id: 'analytics', label: 'Analytics' },
   ];
 
-  const progressPercentage = (Number(campaign.totalFunded) / Number(campaign.fundingGoal)) * 100;
+  const progressPercentage = (Number(campaign.totalFunded) / Number(campaign.loanAmount)) * 100;
   const daysLeft = Math.max(0, Math.floor((Number(campaign.deadline) * 1000 - Date.now()) / (1000 * 60 * 60 * 24)));
 
   return (
@@ -253,7 +253,7 @@ export default function CampaignDetails({ campaignId }: CampaignDetailsProps) {
                     {/* Business Metrics Preview */}
                     <div className="bg-gray-50 rounded-lg p-6">
                       <h4 className="font-medium text-gray-900 mb-4">Platform Metrics</h4>
-                      <BusinessMetricsSummary address={campaign.owner} compact />
+                      <BusinessMetricsSummary address={campaign.borrower?.address || ''} compact />
                     </div>
                   </div>
                 ) : (
@@ -282,7 +282,7 @@ export default function CampaignDetails({ campaignId }: CampaignDetailsProps) {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Business Profile:</span>
                       <Link
-                        href={`/business/profile/${campaign.owner}`}
+                        href={`/business/profile/${campaign.borrower?.address}`}
                         className="text-primary-600 hover:text-primary-800"
                       >
                         View Full Profile →
@@ -296,7 +296,7 @@ export default function CampaignDetails({ campaignId }: CampaignDetailsProps) {
 
           {activeTab === 'analytics' && (
             <div className="space-y-6">
-              <BusinessAnalytics address={campaign.owner} />
+              <BusinessAnalytics address={campaign.borrower?.address || ''} />
             </div>
           )}
 

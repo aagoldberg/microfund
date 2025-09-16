@@ -63,6 +63,13 @@ export const campaignAbi = [
   },
   {
     inputs: [],
+    name: "withdrawAvailableReturns",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [],
     name: "borrower",
     outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
@@ -153,6 +160,20 @@ export const campaignAbi = [
     type: "function"
   },
   {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "withdrawnAmounts",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [{ internalType: "address", name: "contributor", type: "address" }],
+    name: "getAvailableReturns",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
     anonymous: false,
     inputs: [
       { indexed: true, internalType: "address", name: "contributor", type: "address" },
@@ -192,6 +213,15 @@ export const campaignAbi = [
       { indexed: false, internalType: "uint256", name: "totalAmount", type: "uint256" }
     ],
     name: "LoanRepaid",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "address", name: "contributor", type: "address" },
+      { indexed: false, internalType: "uint256", name: "amount", type: "uint256" }
+    ],
+    name: "ReturnsWithdrawn",
     type: "event"
   }
 ] as const;

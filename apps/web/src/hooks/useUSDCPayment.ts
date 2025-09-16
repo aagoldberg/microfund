@@ -183,22 +183,22 @@ export function useUSDCPayment({
     if (approvalError) {
       console.error('🚨 Approval error:', approvalError);
       console.error('Error details:', {
-        code: approvalError.cause?.code,
+        code: (approvalError.cause as any)?.code,
         message: approvalError.message,
-        data: approvalError.cause?.data,
+        data: (approvalError.cause as any)?.data,
       });
-      setError(`Approval failed: ${approvalError.shortMessage || approvalError.message}`);
+      setError(`Approval failed: ${(approvalError as any).shortMessage || approvalError.message}`);
       setIsApproving(false);
     }
     
     if (contributionError) {
       console.error('🚨 Contribution error:', contributionError);
       console.error('Error details:', {
-        code: contributionError.cause?.code,
+        code: (contributionError.cause as any)?.code,
         message: contributionError.message,
-        data: contributionError.cause?.data,
+        data: (contributionError.cause as any)?.data,
       });
-      setError(`Contribution failed: ${contributionError.shortMessage || contributionError.message}`);
+      setError(`Contribution failed: ${(contributionError as any).shortMessage || contributionError.message}`);
       setIsContributing(false);
     }
   }, [approvalError, contributionError]);

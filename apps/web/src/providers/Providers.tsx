@@ -46,9 +46,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             createOnLogin: 'users-without-wallets',
           },
           externalWallets: {
-            metamask: {},
             coinbaseWallet: {},
-            walletConnect: {},
+            walletConnect: { enabled: true },
           },
           loginMethods: ['wallet'],
         }}

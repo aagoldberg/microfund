@@ -56,7 +56,7 @@ export default function PortfolioPage() {
                 Funding Portfolio
               </h1>
               <p className="text-gray-600 mt-1">
-                Track your revenue-based financing contributions and repayments
+                Track your microloan contributions and repayments
               </p>
             </div>
             

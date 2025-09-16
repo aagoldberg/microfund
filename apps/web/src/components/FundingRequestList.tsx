@@ -59,7 +59,7 @@ function FundingRequestCard({ campaign }: { campaign: EnhancedCampaign }) {
     : 0;
 
   // Calculate time remaining
-  const daysRemaining = campaign.fundingDeadline ? Math.max(0, Math.floor((Number(campaign.fundingDeadline) - Date.now() / 1000) / 86400)) : 0;
+  const daysRemaining = campaign.deadline ? Math.max(0, Math.floor((Number(campaign.deadline) - Date.now() / 1000) / 86400)) : 0;
   const isActive = campaign.fundingActive;
   const isFullyFunded = progressPercentage >= 100;
 

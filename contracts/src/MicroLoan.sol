@@ -45,6 +45,7 @@ contract MicroLoan is ReentrancyGuard {
     bool public loanFullyRepaid;
 
     mapping(address => uint256) public contributions;
+    mapping(address => uint256) public withdrawnAmounts;
     address[] public contributors;
 
     event Contributed(address indexed contributor, uint256 amount);
@@ -53,6 +54,7 @@ contract MicroLoan is ReentrancyGuard {
     event RepaymentMade(uint256 amount, uint256 totalRepaid);
     event LoanRepaid(uint256 totalAmount);
     event CampaignRefunded(address indexed contributor, uint256 amount);
+    event ReturnsWithdrawn(address indexed contributor, uint256 amount);
     event MetadataUpdated(string newURI);
 
     modifier onlyBorrower() {
@@ -205,6 +207,19 @@ contract MicroLoan is ReentrancyGuard {
         emit CampaignRefunded(msg.sender, contribution);
     }
 
+    function withdrawAvailableReturns() external nonReentrant {
+        if (!loanDisbursed) revert CampaignNotActive();
+        if (contributions[msg.sender] == 0) revert InvalidAmount();
+
+        uint256 availableAmount = getAvailableReturns(msg.sender);
+        if (availableAmount == 0) revert InvalidAmount();
+
+        withdrawnAmounts[msg.sender] += availableAmount;
+        token.safeTransfer(msg.sender, availableAmount);
+
+        emit ReturnsWithdrawn(msg.sender, availableAmount);
+    }
+
     function updateMetadata(string memory newURI) external onlyBorrower {
         if (bytes(newURI).length == 0) revert EmptyMetadataURI();
         if (block.timestamp < lastMetadataUpdate + METADATA_UPDATE_COOLDOWN) {
@@ -239,5 +254,17 @@ contract MicroLoan is ReentrancyGuard {
         if (!loanDisbursed) return loanAmount;
         if (loanFullyRepaid) return 0;
         return loanAmount - totalRepaid;
+    }
+
+    function getAvailableReturns(address contributor) public view returns (uint256) {
+        if (!loanDisbursed || contributions[contributor] == 0) return 0;
+
+        // Calculate proportional share of total repayments made so far
+        uint256 totalShare = (contributions[contributor] * totalRepaid) / loanAmount;
+
+        // Subtract what has already been withdrawn
+        uint256 alreadyWithdrawn = withdrawnAmounts[contributor];
+
+        return totalShare > alreadyWithdrawn ? totalShare - alreadyWithdrawn : 0;
     }
 }
