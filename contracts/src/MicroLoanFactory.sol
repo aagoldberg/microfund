@@ -12,6 +12,11 @@ contract MicroLoanFactory is Ownable {
     error BusinessNotRegistered();
     error EmptyMetadataURI();
 
+    struct BusinessParams {
+        string name;
+        string metadataURI;
+    }
+
     BusinessRegistry public immutable businessRegistry;
     address public immutable token;
 
@@ -46,9 +51,21 @@ contract MicroLoanFactory is Ownable {
         uint256 loanAmount,
         uint256 fundingDuration,
         uint256 repaymentDuration,
-        uint256 gracePeriod
+        uint256 gracePeriod,
+        BusinessParams memory businessParams
     ) external returns (address) {
-        if (!businessRegistry.isRegistered(msg.sender)) revert BusinessNotRegistered();
+        // Auto-register business if not already registered
+        if (!businessRegistry.isRegistered(msg.sender)) {
+            // Require business parameters for new businesses
+            if (bytes(businessParams.name).length == 0) revert EmptyMetadataURI();
+            if (bytes(businessParams.metadataURI).length == 0) revert EmptyMetadataURI();
+
+            businessRegistry.registerBusinessFor(
+                msg.sender,
+                businessParams.name,
+                businessParams.metadataURI
+            );
+        }
         if (bytes(metadataURI).length == 0) revert EmptyMetadataURI();
         if (loanAmount < MIN_LOAN_AMOUNT || loanAmount > MAX_LOAN_AMOUNT) {
             revert InvalidLoanAmount();
@@ -127,4 +144,5 @@ contract MicroLoanFactory is Ownable {
 
         return activeLoans;
     }
+
 }

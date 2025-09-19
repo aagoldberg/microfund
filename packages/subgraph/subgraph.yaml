@@ -6,9 +6,8 @@ dataSources:
     name: BusinessRegistry
     network: base-sepolia
     source:
-      address: "0xe37d471C5d34F5604A7723dCD5A318cBaFfB72E8"
+      address: "0x0982231554808AC4e165c7D2BC3B9B636743E51f"
       abi: BusinessRegistry
-      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -32,9 +31,8 @@ dataSources:
     name: MicroLoanFactory
     network: base-sepolia
     source:
-      address: "0xda4F8053643bB207D5f3711b8E3f70b89c3D945A"
+      address: "0xbE4A437a025178aB9100e399489F042ccb6191C9"
       abi: MicroLoanFactory
-      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

@@ -227,6 +227,12 @@ export default function CreateLoanForm() {
 
       setUploadProgress('Creating blockchain transaction...');
 
+      // Prepare business parameters
+      const businessParams = {
+        name: formData.businessName || 'Default Business',
+        metadataURI: businessURI || campaignURI, // Use business URI if available, otherwise loan URI
+      };
+
       writeContract({
         address: factoryAddress as `0x${string}`,
         abi: factoryAbi,
@@ -237,6 +243,7 @@ export default function CreateLoanForm() {
           fundingDurationSeconds,
           repaymentDurationSeconds,
           gracePeriodSeconds,
+          businessParams,
         ],
       });
     } catch (error) {
